@@ -79,7 +79,7 @@
             </h1>
             <p class="text-lg md:text-xl text-primary-100/80 max-w-3xl mx-auto">
                 Mengenal lebih dekat Kebun Raya Universitas Pahlawan Tuanku Tambusai, 
-                pusat konservasi flora dataran rendah Sumatera.
+                pusat konservasi flora Sumatera.
             </p>
         </div>
     </section>
