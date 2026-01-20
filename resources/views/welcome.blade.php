@@ -22,7 +22,7 @@
             <div class="flex items-center justify-between h-16 md:h-20">
                 <!-- Logo -->
                 <a href="/" class="flex items-center space-x-3">
-                    <img src="{{ asset('assets/images/logo.png') }}" alt="Logo Kebun Raya" class="h-10 md:h-12 w-auto" onerror="this.style.display='none'">
+                    <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo Kebun Raya" class="h-10 md:h-12 w-auto rounded-full" onerror="this.style.display='none'">
                     <div class="hidden sm:block">
                         <span class="text-white font-bold text-lg md:text-xl">Kebun Raya</span>
                         <span class="block text-primary-300 text-xs md:text-sm">Universitas Pahlawan</span>
@@ -93,7 +93,7 @@
                     Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </p>
                 
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
                     <a href="/about" class="group px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-primary-500/50 animate-pulse-glow">
                         Selengkapnya
                         <svg class="inline-block w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@
     </section>
 
     <!-- About Preview Section -->
-    <section class="py-20 md:py-28 bg-white">
+    <section class="py-20 md:py-28 bg-white scroll-animate opacity-0 translate-y-10 transition-all duration-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div class="animate-fade-in-up">
@@ -175,7 +175,8 @@
     </section>
 
     <!-- Awards Section -->
-    <section class="py-20 md:py-28 bg-gray-50">
+    <section class="py-20 md:py-28 bg-gray-50 scroll-animate opacity-0 translate-y-10 transition-all duration-700">
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-4">
@@ -239,7 +240,7 @@
     </section>
 
     <!-- 5 Fungsi Section -->
-    <section id="fungsi" class="py-20 md:py-28 bg-gradient-botanical text-white">
+    <section id="fungsi" class="py-20 md:py-28 bg-gradient-botanical text-white scroll-animate opacity-0 translate-y-10 transition-all duration-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-white/20 text-white rounded-full text-sm font-medium mb-4">
@@ -324,7 +325,7 @@
     </section>
 
     <!-- Social Media Section -->
-    <section class="py-20 md:py-28 bg-white">
+    <section class="py-20 md:py-28 bg-white scroll-animate opacity-0 translate-y-10 transition-all duration-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <span class="inline-block px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-4">
                 📱 Ikuti Kami
@@ -387,7 +388,7 @@
                 <!-- Brand -->
                 <div class="lg:col-span-2">
                     <div class="flex items-center space-x-3 mb-6">
-                        <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" class="h-12 w-auto" onerror="this.style.display='none'">
+                        <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo" class="h-12 w-auto rounded-full" onerror="this.style.display='none'">
                         <div>
                             <h3 class="text-xl font-bold">Kebun Raya</h3>
                             <p class="text-primary-400 text-sm">Universitas Pahlawan Tuanku Tambusai</p>
@@ -428,7 +429,7 @@
                 </div>
                 
                 <!-- Contact -->
-                <div>
+                <div class="overflow-hidden">
                     <h4 class="text-lg font-semibold mb-6">Kontak</h4>
                     <ul class="space-y-4">
                         <li class="flex items-start space-x-3">
@@ -436,13 +437,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span class="text-gray-400">Universitas Pahlawan Tuanku Tambusai, Riau</span>
+                            <span class="text-gray-400 break-words">Universitas Pahlawan Tuanku Tambusai, Riau</span>
                         </li>
-                        <li class="flex items-center space-x-3">
-                            <svg class="w-5 h-5 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <li class="flex items-start space-x-3">
+                            <svg class="w-5 h-5 text-primary-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
-                            <span class="text-gray-400">kebunraya@universitaspahlawan.ac.id</span>
+                            <span class="text-gray-400 break-all text-sm">kebunraya@universitaspahlawan.ac.id</span>
                         </li>
                         <li class="flex items-center space-x-3">
                             <svg class="w-5 h-5 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -476,6 +477,26 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
+        });
+
+        // Scroll Animation with Intersection Observer
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
         });
     </script>
 </body>
