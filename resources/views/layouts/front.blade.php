@@ -37,7 +37,8 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ route('tentang-kami') }}" wire:navigate class="text-white hover:text-primary-300 transition-colors font-medium">Tentang
+                    <a href="{{ route('tentang-kami') }}" wire:navigate
+                        class="text-white hover:text-primary-300 transition-colors font-medium">Tentang
                         Kami</a>
                     <a href="#"
                         class="text-white hover:text-primary-300 transition-colors font-medium">Repositori</a>
@@ -190,29 +191,56 @@
     @livewireScripts
     <!-- Mobile Menu Script -->
     <script>
-        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+        // 1. Kita bungkus logikanya dalam satu fungsi agar bisa dipanggil ulang
+        function initCustomScripts() {
+
+            // --- BAGIAN 1: MOBILE MENU ---
+            const btn = document.getElementById('mobile-menu-btn');
             const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+
+            // Cek dulu apakah tombolnya ada di halaman ini? (Penting agar tidak error)
+            if (btn && menu) {
+                // Hapus listener lama jika ada (opsional tapi aman)
+                btn.replaceWith(btn.cloneNode(true));
+                const newBtn = document.getElementById('mobile-menu-btn');
+
+                newBtn.addEventListener('click', function() {
+                    menu.classList.toggle('hidden');
+                });
+            }
+
+            // --- BAGIAN 2: SCROLL ANIMATION ---
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.remove('opacity-0', 'translate-y-10');
+                        entry.target.classList.add('opacity-100', 'translate-y-0');
+                        // Opsional: Stop observe setelah animasi selesai agar ringan
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Cari elemen .scroll-animate yang BARU, lalu observe ulang
+            document.querySelectorAll('.scroll-animate').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // 2. Jalankan saat halaman pertama kali dibuka (Refresh/F5)
+        document.addEventListener('DOMContentLoaded', () => {
+            initCustomScripts();
         });
 
-        // Scroll Animation with Intersection Observer
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.remove('opacity-0', 'translate-y-10');
-                    entry.target.classList.add('opacity-100', 'translate-y-0');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.scroll-animate').forEach(el => {
-            observer.observe(el);
+        // 3. Jalankan SETIAP KALI pindah halaman via wire:navigate
+        document.addEventListener('livewire:navigated', () => {
+            initCustomScripts();
         });
     </script>
 
