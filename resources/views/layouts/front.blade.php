@@ -22,55 +22,119 @@
 <body class="bg-gray-50 font-sans antialiased">
 
     <!-- Sticky Navbar -->
-    <header class="fixed top-0 left-0 right-0 z-50 glass-effect bg-primary-900/90">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 md:h-20">
-                <!-- Logo -->
-                <a href="/" class="flex items-center space-x-3">
-                    <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo Kebun Raya"
-                        class="h-10 md:h-12 w-auto rounded-full" onerror="this.style.display='none'">
-                    <div class="hidden sm:block">
-                        <span class="text-white font-bold text-lg md:text-xl">Kebun Raya</span>
-                        <span class="block text-primary-300 text-xs md:text-sm">Universitas Pahlawan</span>
-                    </div>
+  <header 
+    x-data="{ 
+        isScrolled: false, 
+        mobileOpen: false 
+    }" 
+    @scroll.window="isScrolled = (window.pageYOffset > 20)"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out"
+    :class="isScrolled 
+        ? 'bg-white/90 backdrop-blur-md shadow-md py-2' 
+        : 'bg-primary-900/30 backdrop-blur-md border-b border-white/10 py-4'"
+>
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-12 md:h-14">
+            
+            <a href="/" class="flex items-center space-x-3 group">
+                <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo"
+                    class="h-10 w-10 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110" 
+                    onerror="this.style.display='none'">
+                
+                <div class="hidden sm:block">
+                    <span 
+                        class="block font-bold text-lg leading-tight transition-colors duration-300"
+                        :class="isScrolled ? 'text-primary-900' : 'text-white drop-shadow-md'"
+                    >
+                        Kebun Raya
+                    </span>
+                    <span 
+                        class="block text-xs font-medium transition-colors duration-300"
+                        :class="isScrolled ? 'text-primary-600' : 'text-primary-200'"
+                    >
+                        Universitas Pahlawan
+                    </span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="{{ route('tentang-kami') }}" wire:navigate
+                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                   Tentang Kami
+                </a>
+                
+                <a href="#"
+                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                   Repositori
+                </a>
+                
+                <a href="#fungsi" 
+                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                   Fungsi
                 </a>
 
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="{{ route('tentang-kami') }}" wire:navigate
-                        class="text-white hover:text-primary-300 transition-colors font-medium">Tentang
-                        Kami</a>
-                    <a href="#"
-                        class="text-white hover:text-primary-300 transition-colors font-medium">Repositori</a>
-                    <a href="#fungsi" class="text-white hover:text-primary-300 transition-colors font-medium">Fungsi</a>
-                    <a href="#kontak" class="text-white hover:text-primary-300 transition-colors font-medium">Kontak</a>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden text-white p-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                 <a href="#kontak" 
+                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                   kontak
+                </a>
+                
+                <a href="/login" wire:navigate 
+                   class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 shadow-sm"
+                   :class="isScrolled 
+                        ? 'bg-primary-600 text-white hover:bg-primary-700' 
+                        : 'bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm'">
+                   Login
+                </a>
             </div>
 
-            <!-- Mobile Menu -->
-            <div id="mobile-menu" class="hidden md:hidden pb-4">
-                <div class="flex flex-col space-y-3">
-                    <a href="{{ route('tentang-kami') }}" wire:navigate
-                        class="text-white hover:text-primary-300 transition-colors font-medium py-2">Tentang Kami</a>
-                    <a href="#"
-                        class="text-white hover:text-primary-300 transition-colors font-medium py-2">Repositori</a>
-                    <a href="#fungsi"
-                        class="text-white hover:text-primary-300 transition-colors font-medium py-2">Fungsi</a>
-                    <a href="#kontak"
-                        class="text-white hover:text-primary-300 transition-colors font-medium py-2">Kontak</a>
-                </div>
-            </div>
-        </nav>
-    </header>
+            <button 
+                @click="mobileOpen = !mobileOpen" 
+                class="md:hidden p-2 rounded-lg transition-colors focus:outline-none"
+                :class="isScrolled ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
 
+        <div 
+            x-show="mobileOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 -translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-2"
+            class="md:hidden mt-2 bg-primary-900/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+            style="display: none;" 
+        >
+            <div class="flex flex-col py-2">
+                <a href="{{ route('tentang-kami') }}" wire:navigate
+                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                    Tentang Kami
+                </a>
+                <a href="#"
+                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                    Repositori
+                </a>
+                <a href="#fungsi"
+                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                    Fungsi
+                </a>
+                <a href="#kontak"
+                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium">
+                    Kontak
+                </a>
+            </div>
+        </div>
+    </nav>
+</header>
 
     {{-- SLOT --}}
 
@@ -189,18 +253,13 @@
         </div>
     </footer>
     @livewireScripts
-    <!-- Mobile Menu Script -->
-    <script>
-        // 1. Kita bungkus logikanya dalam satu fungsi agar bisa dipanggil ulang
-        function initCustomScripts() {
 
-            // --- BAGIAN 1: MOBILE MENU ---
+    <script>
+        function initCustomScripts() {
             const btn = document.getElementById('mobile-menu-btn');
             const menu = document.getElementById('mobile-menu');
 
-            // Cek dulu apakah tombolnya ada di halaman ini? (Penting agar tidak error)
             if (btn && menu) {
-                // Hapus listener lama jika ada (opsional tapi aman)
                 btn.replaceWith(btn.cloneNode(true));
                 const newBtn = document.getElementById('mobile-menu-btn');
 
@@ -209,7 +268,6 @@
                 });
             }
 
-            // --- BAGIAN 2: SCROLL ANIMATION ---
             const observerOptions = {
                 root: null,
                 rootMargin: '0px',
@@ -227,18 +285,17 @@
                 });
             }, observerOptions);
 
-            // Cari elemen .scroll-animate yang BARU, lalu observe ulang
             document.querySelectorAll('.scroll-animate').forEach(el => {
                 observer.observe(el);
             });
         }
 
-        // 2. Jalankan saat halaman pertama kali dibuka (Refresh/F5)
+ 
         document.addEventListener('DOMContentLoaded', () => {
             initCustomScripts();
         });
 
-        // 3. Jalankan SETIAP KALI pindah halaman via wire:navigate
+      
         document.addEventListener('livewire:navigated', () => {
             initCustomScripts();
         });
