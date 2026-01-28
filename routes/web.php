@@ -18,6 +18,8 @@ Route::livewire('/login', 'auth.login')->name('login');
 
 Route::livewire('/admin', 'admin.dashboard')->name('dashboard');
 
+Route::livewire('/admin/berita', 'admin.berita')->name('berita');
+
 Route::get('/about', function () {
     return view('about');
 });
