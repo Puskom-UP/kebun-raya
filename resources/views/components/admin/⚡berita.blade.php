@@ -24,15 +24,15 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
     #[Rule('required|min:5')]
     public $title = '';
 
-    #[Rule('required')]
-    public $category = 'Berita';
+    public $category;
 
+    #[Rule('required')]
     public $categori_id;
 
     #[Rule('required|min:10')]
     public $content = '';
 
-    #[Rule('nullable|image|max:2048')]
+    #[Rule('nullable|max:10240')]
     public $image;
 
     public $status = 'published';
@@ -42,7 +42,7 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
     // Reset Form saat modal ditutup
     public function resetForm()
     {
-        $this->reset(['title', 'category', 'content', 'image', 'status', 'postId', 'isEditMode']);
+        $this->reset(['title', 'categori_id', 'content', 'image', 'status', 'postId', 'isEditMode']);
         $this->resetValidation();
     }
 
@@ -59,10 +59,10 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
         $post = Post::find($id);
         $this->postId = $post->id;
         $this->title = $post->title;
-        $this->category = $post->category->name;
+        $this->category = $post->category;
         $this->content = $post->content;
         $this->status = $post->status;
-
+        $this->image = $post->image;
         $this->isEditMode = true;
         $this->showModal = true;
     }
@@ -193,7 +193,8 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                     <div
                                         class="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                                         @if (isset($post->image))
-                                            <img src="{{ $post->image }}" class="w-full h-full object-cover">
+                                            <img src="{{ asset('storage/' . $post->image) }}"
+                                                class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-gray-400">
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor"
@@ -336,11 +337,21 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
                                         <select wire:model="categori_id"
                                             class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4 bg-white">
-                                            @foreach ($kategoris as $kategori)
+                                            @if ($category != null)
+                                                <option value="{{ $category->id }}" selected>{{ $category->name }}
+                                                </option>
+                                            @else
                                                 <option selected>Pilih Kategori</option>
+                                            @endif
+
+                                            @foreach ($kategoris as $kategori)
                                                 <option value="{{ $kategori->id }}">{{ $kategori->name }}</option>
                                             @endforeach
                                         </select>
+
+                                        @error('categori_id')
+                                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                        @enderror
                                     </div>
 
                                     <div>
@@ -363,21 +374,63 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
 
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Gambar Utama</label>
-                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 hover:border-primary-400 transition-all cursor-pointer relative"
+
+                                    <div wire:key="upload-wrapper-{{ $iteration ?? 'init' }}"
+                                        class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 hover:border-primary-400 transition-all cursor-pointer relative"
                                         x-data="{ isUploading: false, progress: 0 }" x-on:livewire-upload-start="isUploading = true"
                                         x-on:livewire-upload-finish="isUploading = false"
                                         x-on:livewire-upload-error="isUploading = false"
                                         x-on:livewire-upload-progress="progress = $event.detail.progress">
-                                        <div class="space-y-1 text-center">
+
+                                        <div class="space-y-1 text-center w-full">
+
+                                            {{-- KONDISI 1: ADA GAMBAR BARU (PREVIEW) --}}
                                             @if ($image && !is_string($image))
-                                                <img src="{{ $image->temporaryUrl() }}"
-                                                    class="mx-auto h-32 object-cover rounded-lg shadow-sm">
-                                                <button wire:click="$set('image', null)" type="button"
-                                                    class="text-xs text-red-600 font-medium hover:underline mt-2">Hapus
-                                                    Gambar</button>
+                                                <div class="relative">
+                                                    <img src="{{ $image->temporaryUrl() }}"
+                                                        class="mx-auto h-32 object-cover rounded-lg shadow-sm">
+                                                    <button wire:click="$set('image', null)" type="button"
+                                                        class="text-xs text-red-600 font-medium hover:underline mt-2">
+                                                        Hapus Gambar
+                                                    </button>
+                                                </div>
+
+                                                {{-- KONDISI 2: ADA GAMBAR LAMA DARI DB (EDIT MODE) --}}
                                             @elseif($postId && $image && is_string($image))
-                                                <img src="{{ asset('storage/' . $image) }}"
-                                                    class="mx-auto h-32 object-cover rounded-lg shadow-sm">
+                                                <div class="relative">
+                                                    <img src="{{ asset('storage/' . $image) }}"
+                                                        class="mx-auto h-32 object-cover rounded-lg shadow-sm">
+
+                                                    <div class="mt-2">
+                                                        <label for="file-upload-replace"
+                                                            class="cursor-pointer text-xs text-primary-600 font-bold hover:underline z-10 relative">
+                                                            Ganti Gambar
+                                                            <input id="file-upload-replace" wire:model="image"
+                                                                type="file" class="sr-only"
+                                                                accept="image/png, image/jpeg, image/jpg, image/webp">
+                                                        </label>
+                                                    </div>
+
+                                                    <div x-show="isUploading"
+                                                        class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl z-20">
+                                                        <div class="text-center">
+                                                            <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 24 24">
+                                                                <circle class="opacity-25" cx="12"
+                                                                    cy="12" r="10" stroke="currentColor"
+                                                                    stroke-width="4"></circle>
+                                                                <path class="opacity-75" fill="currentColor"
+                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                                </path>
+                                                            </svg>
+                                                            <p class="text-xs text-primary-600 mt-2 font-medium"
+                                                                x-text="progress + '%'"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {{-- KONDISI 3: BELUM ADA GAMBAR (FORM INPUT) --}}
                                             @else
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
                                                     fill="none" viewBox="0 0 48 48">
@@ -386,40 +439,44 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                                         stroke-width="2" stroke-linecap="round"
                                                         stroke-linejoin="round" />
                                                 </svg>
+
                                                 <div class="flex text-sm text-gray-600 justify-center mt-2">
                                                     <label for="file-upload"
                                                         class="relative cursor-pointer rounded-md font-bold text-primary-600 hover:text-primary-500 focus-within:outline-none">
                                                         <span>Upload gambar</span>
                                                         <input id="file-upload" wire:model="image" type="file"
-                                                            class="sr-only">
+                                                            class="sr-only"
+                                                            accept="image/png, image/jpeg, image/jpg, image/webp">
                                                     </label>
                                                 </div>
                                                 <p class="text-xs text-gray-500 mt-1">PNG, JPG max 2MB</p>
-                                            @endif
-                                        </div>
 
-                                        <div x-show="isUploading"
-                                            class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl">
-                                            <div class="text-center">
-                                                <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-                                                <p class="text-xs text-primary-600 mt-2 font-medium"
-                                                    x-text="progress + '%'"></p>
-                                            </div>
+                                                {{-- SPINNER UTAMA (DIPINDAHKAN KE SINI) --}}
+                                                {{-- Karena ada di dalam @else, saat gambar jadi preview, elemen ini musnah --}}
+                                                <div x-show="isUploading"
+                                                    class="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl z-20">
+                                                    <div class="text-center">
+                                                        <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12"
+                                                                r="10" stroke="currentColor" stroke-width="4">
+                                                            </circle>
+                                                            <path class="opacity-75" fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                            </path>
+                                                        </svg>
+                                                        <p class="text-xs text-primary-600 mt-2 font-medium"
+                                                            x-text="progress + '%'"></p>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                     @error('image')
                                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                     @enderror
                                 </div>
-
                                 <div wire:ignore>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Konten Berita</label>
 
@@ -486,11 +543,20 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
     @if ($showDeleteModal)
         <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
             aria-modal="true">
+
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+                <div wire:click="$set('showDeleteModal', false)"
+                    class="fixed inset-0 transition-opacity" 
+     style="background-color: rgba(0, 0, 0, 0.5);"
+     aria-hidden="true">
+                </div>
+
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
                 <div
-                    class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    class="relative z-50 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
                             <div
@@ -503,15 +569,19 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                 </svg>
                             </div>
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Hapus Berita
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Hapus Berita
                                 </h3>
                                 <div class="mt-2">
-                                    <p class="text-sm text-gray-500">Apakah Anda yakin ingin menghapus berita ini? Data
-                                        yang dihapus tidak dapat dikembalikan.</p>
+                                    <p class="text-sm text-gray-500">
+                                        Apakah Anda yakin ingin menghapus berita ini? Data yang dihapus tidak dapat
+                                        dikembalikan.
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                         <button wire:click="delete" type="button"
                             class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
