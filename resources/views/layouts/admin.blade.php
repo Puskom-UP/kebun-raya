@@ -79,7 +79,7 @@
                         <div class="border-t border-white/10"></div>
                     </div>
 
-                    <a href="#"
+                    <a href="{{ route('pengaturan') }}" wire:navigate
                         class="flex items-center px-4 py-3 rounded-xl text-primary-100 hover:bg-white/10 hover:text-white transition-all duration-200 group">
                         <svg class="w-5 h-5 mr-3 text-primary-400 group-hover:text-white transition-colors"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">

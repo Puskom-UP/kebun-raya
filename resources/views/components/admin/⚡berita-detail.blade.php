@@ -136,7 +136,7 @@ class extends Component {
                         <p class="text-gray-600 text-sm leading-relaxed mb-4">
                             Kebun Raya Universitas Pahlawan adalah pusat konservasi flora dataran rendah Sumatera.
                         </p>
-                        <a href="/about" class="text-sm font-semibold text-primary-600 hover:underline">Pelajari lebih lanjut &rarr;</a>
+                        <a href="{{ route('tentang-kami') }}" wire:navigate class="text-sm font-semibold text-primary-600 hover:underline">Pelajari lebih lanjut &rarr;</a>
                     </div>
 
                     <div class="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 sticky top-24">
@@ -158,7 +158,7 @@ class extends Component {
                                             {{ $related->created_at->format('d M Y') }}
                                         </div>
                                         <h4 class="text-sm font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-primary-600 transition-colors">
-                                            <a href="{{ url('/berita/'.$related->id) }}">
+                                            <a href="{{ route('berita.show', $post->slug) }}" wire:navigate>
                                                 {{ $related->title }}
                                             </a>
                                         </h4>

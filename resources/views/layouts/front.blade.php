@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
+@php
+    $site = \App\Models\SiteSetting::first();
+@endphp
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -155,9 +157,7 @@
                         </div>
                     </div>
                     <p class="text-gray-400 leading-relaxed mb-6 max-w-md">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pusat konservasi tumbuhan dataran
-                        rendah
-                        Sumatera dengan berbagai koleksi flora langka dan endemik.
+                       {{ $site->description }}
                     </p>
                     <div class="flex space-x-4">
                         <a href="#"
@@ -210,7 +210,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
-                            <span class="text-gray-400 break-words">Universitas Pahlawan Tuanku Tambusai, Riau</span>
+                            <span class="text-gray-400 break-words">{{ $site->address }}</span>
                         </li>
                         <li class="flex items-start space-x-3">
                             <svg class="w-5 h-5 text-primary-400 flex-shrink-0 mt-1" fill="none"
@@ -219,7 +219,7 @@
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                 </path>
                             </svg>
-                            <span class="text-gray-400 break-all text-sm">kebunraya@universitaspahlawan.ac.id</span>
+                            <span class="text-gray-400 break-all text-sm">{{ $site->email }}</span>
                         </li>
                         <li class="flex items-center space-x-3">
                             <svg class="w-5 h-5 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor"
@@ -228,7 +228,7 @@
                                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
                                 </path>
                             </svg>
-                            <span class="text-gray-400">+62 812 3456 7890</span>
+                            <span class="text-gray-400">{{ $site->phone }}</span>
                         </li>
                     </ul>
                 </div>
@@ -240,7 +240,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                     <p class="text-gray-500 text-sm text-center md:text-left">
-                        © 2026 Kebun Raya Universitas Pahlawan Tuanku Tambusai. All rights reserved.
+                        © 2026 {{ $site->site_name ?? 'Kebun Raya' }}. All rights reserved.
                     </p>
                     <div class="flex items-center space-x-6">
                         <a href="#" class="text-gray-500 hover:text-white text-sm transition-colors">Kebijakan

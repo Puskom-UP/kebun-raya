@@ -3,6 +3,7 @@
  use Livewire\Attributes\Computed;
  use Livewire\Component;
  use App\Models\Post;
+ use App\Models\SiteSetting;
  
  new #[Layout('layouts.front')] 
  class extends Component {
@@ -10,6 +11,13 @@
      public function posts()
      {
          return Post::all();
+     }
+
+       public function with()
+     {
+         return [
+             'site' => SiteSetting::first(),
+         ];
      }
  };
  ?>
@@ -56,34 +64,7 @@
                      </h2>
 
                      <div class="prose prose-lg text-gray-600">
-                         <p class="leading-relaxed mb-6">
-                             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut perspiciatis unde omnis
-                             iste natus
-                             error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae
-                             ab illo
-                             inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam
-                             voluptatem
-                             quia voluptas sit aspernatur aut odit aut fugit.
-                         </p>
-
-                         <p class="leading-relaxed mb-6">
-                             Sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro
-                             quisquam
-                             est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non
-                             numquam eius
-                             modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad
-                             minima veniam,
-                             quis nostrum exercitationem ullam corporis suscipit laboriosam.
-                         </p>
-
-                         <p class="leading-relaxed">
-                             Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae
-                             consequatur,
-                             vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et
-                             iusto odio
-                             dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos
-                             dolores.
-                         </p>
+                       {!! nl2br(e($site->about)) !!}
                      </div>
                  </div>
 
@@ -154,11 +135,7 @@
                      </div>
                      <h3 class="text-2xl font-bold text-gray-900 mb-4">Visi</h3>
                      <p class="text-gray-600 text-lg leading-relaxed">
-                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Menjadi pusat konservasi tumbuhan
-                         terkemuka
-                         yang berkontribusi dalam pelestarian keanekaragaman hayati flora dataran rendah Sumatera dan
-                         menjadi
-                         rujukan penelitian botani tingkat nasional dan internasional.
+                         {{ $site->vision }}
                      </p>
                  </div>
 

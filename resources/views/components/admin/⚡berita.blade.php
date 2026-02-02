@@ -17,36 +17,32 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
     public $showDeleteModal = false;
     public $isEditMode = false;
     public $deleteId = null;
+    public $search = '';
 
-    // State Data Form
     public $postId;
 
     #[Rule('required|min:5')]
     public $title = '';
 
-    public $category;
-
     #[Rule('required')]
-    public $categori_id;
+    public $category_id;
 
     #[Rule('required|min:10')]
     public $content = '';
 
-    #[Rule('nullable|max:10240')]
+    #[Rule('nullable|image|max:10240')]
     public $image;
+
+    public $oldImage;
 
     public $status = 'published';
 
-    public $search = '';
-
-    // Reset Form saat modal ditutup
     public function resetForm()
     {
-        $this->reset(['title', 'categori_id', 'content', 'image', 'status', 'postId', 'isEditMode']);
+        $this->reset(['title', 'category_id', 'content', 'image', 'oldImage', 'status', 'postId', 'isEditMode']);
         $this->resetValidation();
     }
 
-    // Buka Modal Tambah
     public function create()
     {
         $this->resetForm();
@@ -57,12 +53,15 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
     {
         $this->resetForm();
         $post = Post::find($id);
+
         $this->postId = $post->id;
         $this->title = $post->title;
-        $this->category = $post->category;
+        $this->category_id = $post->category_id;
         $this->content = $post->content;
         $this->status = $post->status;
-        $this->image = $post->image;
+        $this->oldImage = $post->image;
+        $this->image = null;
+
         $this->isEditMode = true;
         $this->showModal = true;
     }
@@ -75,33 +74,34 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
             'title' => $this->title,
             'slug' => Str::slug($this->title),
             'content' => $this->content,
-            'category_id' => $this->categori_id,
+            'category_id' => $this->category_id,
             'status' => $this->status,
-            'user_id' => Auth()->user()->id,
+            'user_id' => auth()->id(),
         ];
 
+        // Only handle upload if a NEW file was chosen
         if ($this->image) {
             $data['image'] = $this->image->store('posts', 'public');
         }
 
         if ($this->isEditMode) {
             Post::where('id', $this->postId)->update($data);
+            $message = 'Berita berhasil diperbarui!';
         } else {
             Post::create($data);
+            $message = 'Berita berhasil ditambahkan!';
         }
 
         $this->showModal = false;
-        session()->flash('message', $this->isEditMode ? 'Berita berhasil diperbarui!' : 'Berita berhasil ditambahkan!');
+        session()->flash('message', $message);
     }
 
-    // Konfirmasi Hapus
     public function confirmDelete($id)
     {
         $this->deleteId = $id;
         $this->showDeleteModal = true;
     }
 
-    // Eksekusi Hapus
     public function delete()
     {
         Post::destroy($this->deleteId);
@@ -120,22 +120,22 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
 ?>
 
 <div>
+    {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Kelola Berita</h1>
             <p class="text-gray-500 mt-1">Buat, edit, dan kelola artikel publikasi Kebun Raya.</p>
         </div>
-        <div>
-            <button wire:click="create"
-                class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 bg-primary-900 rounded-xl hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-900 shadow-lg shadow-primary-900/20">
-                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Tambah Berita
-            </button>
-        </div>
+        <button wire:click="create"
+            class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 bg-primary-900 rounded-xl hover:bg-primary-800 shadow-lg shadow-primary-900/20">
+            <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Tambah Berita
+        </button>
     </div>
 
+    {{-- Alert --}}
     @if (session()->has('message'))
         <div
             class="mb-6 p-4 rounded-xl bg-green-50 border border-green-100 text-green-800 text-sm font-medium flex items-center gap-2 animate-fade-in-down">
@@ -147,8 +147,9 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
         </div>
     @endif
 
+    {{-- Main Content / Table --}}
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-
+        {{-- Search & Filter --}}
         <div
             class="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
             <div class="relative w-full sm:w-72">
@@ -159,21 +160,12 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                     </svg>
                 </div>
                 <input wire:model.live.debounce.300ms="search" type="text"
-                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all"
+                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm"
                     placeholder="Cari judul berita...">
-            </div>
-
-            <div class="flex gap-2">
-                <select
-                    class="block w-full pl-3 pr-8 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    <option>Semua Kategori</option>
-                    <option>Berita</option>
-                    <option>Edukasi</option>
-                    <option>Event</option>
-                </select>
             </div>
         </div>
 
+        {{-- Table --}}
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -192,7 +184,7 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                 <div class="flex items-center gap-4">
                                     <div
                                         class="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
-                                        @if (isset($post->image))
+                                        @if ($post->image)
                                             <img src="{{ asset('storage/' . $post->image) }}"
                                                 class="w-full h-full object-cover">
                                         @else
@@ -215,34 +207,38 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                     </div>
                                 </div>
                             </td>
-
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    {{ $post->category->name }}
+                                    {{ $post->category->name ?? 'Uncategorized' }}
                                 </span>
                             </td>
-
                             <td class="px-6 py-4">
                                 @if ($post->status === 'published')
                                     <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-600"></span> Published
-                                    </span>
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"><span
+                                            class="w-1.5 h-1.5 rounded-full bg-green-600"></span> Published</span>
                                 @else
                                     <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span> Draft
-                                    </span>
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700"><span
+                                            class="w-1.5 h-1.5 rounded-full bg-yellow-600"></span> Draft</span>
                                 @endif
                             </td>
-
                             <td class="px-6 py-4 text-gray-500">
                                 {{ \Carbon\Carbon::parse($post->created_at)->translatedFormat('d M Y') }}
                             </td>
-
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('berita.show', $post->slug) }}" wire:navigate
+                                        class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
+                                        title="Lihat Artikel">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </a>
                                     <button wire:click="edit({{ $post->id }})"
                                         class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                                         title="Edit">
@@ -267,19 +263,7 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                <div class="flex flex-col items-center justify-center">
-                                    <div
-                                        class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <h3 class="text-lg font-medium text-gray-900">Belum ada berita</h3>
-                                    <p class="text-sm mt-1">Mulai dengan menambahkan berita baru.</p>
-                                </div>
+                                <p class="text-sm mt-1">Belum ada berita. Mulai dengan menambahkan berita baru.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -288,40 +272,30 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
         </div>
 
         <div class="px-6 py-4 border-t border-gray-100">
-            {{-- {{ $posts->links() }} --}} <p class="text-xs text-gray-500">Menampilkan 3 data terbaru</p>
+            {{ $posts->links() }}
         </div>
     </div>
 
+
     @if ($showModal)
         <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-
             <div wire:click="$set('showModal', false)"
                 class="fixed inset-0 bg-gray-900/80 transition-opacity backdrop-blur-sm"></div>
 
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-
                     <div
                         class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl border border-gray-100">
 
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-xl font-bold text-gray-900" id="modal-title">
-                                    {{ $isEditMode ? 'Edit Berita' : 'Tambah Berita Baru' }}
-                                </h3>
-                                <button wire:click="$set('showModal', false)"
-                                    class="text-gray-400 hover:text-gray-500 bg-gray-50 hover:bg-gray-100 p-2 rounded-lg transition-colors">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">
+                                {{ $isEditMode ? 'Edit Berita' : 'Tambah Berita Baru' }}</h3>
                         </div>
 
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                             <form wire:submit="save" class="space-y-6">
 
+                                {{-- Judul --}}
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Artikel</label>
                                     <input wire:model="title" type="text"
@@ -333,27 +307,22 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {{-- Kategori --}}
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori</label>
-                                        <select wire:model="categori_id"
+                                        <select wire:model="category_id"
                                             class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4 bg-white">
-                                            @if ($category != null)
-                                                <option value="{{ $category->id }}" selected>{{ $category->name }}
-                                                </option>
-                                            @else
-                                                <option selected>Pilih Kategori</option>
-                                            @endif
-
+                                            <option value="">Pilih Kategori</option>
                                             @foreach ($kategoris as $kategori)
                                                 <option value="{{ $kategori->id }}">{{ $kategori->name }}</option>
                                             @endforeach
                                         </select>
-
-                                        @error('categori_id')
+                                        @error('category_id')
                                             <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                         @enderror
                                     </div>
 
+                                    {{-- Status --}}
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status</label>
                                         <div
@@ -372,11 +341,10 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                     </div>
                                 </div>
 
+
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Gambar Utama</label>
-
-                                    <div wire:key="upload-wrapper-{{ $iteration ?? 'init' }}"
-                                        class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 hover:border-primary-400 transition-all cursor-pointer relative"
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 transition-all cursor-pointer relative"
                                         x-data="{ isUploading: false, progress: 0 }" x-on:livewire-upload-start="isUploading = true"
                                         x-on:livewire-upload-finish="isUploading = false"
                                         x-on:livewire-upload-error="isUploading = false"
@@ -384,53 +352,23 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
 
                                         <div class="space-y-1 text-center w-full">
 
-                                            {{-- KONDISI 1: ADA GAMBAR BARU (PREVIEW) --}}
-                                            @if ($image && !is_string($image))
+                                            @if ($image)
                                                 <div class="relative">
                                                     <img src="{{ $image->temporaryUrl() }}"
                                                         class="mx-auto h-32 object-cover rounded-lg shadow-sm">
                                                     <button wire:click="$set('image', null)" type="button"
-                                                        class="text-xs text-red-600 font-medium hover:underline mt-2">
-                                                        Hapus Gambar
-                                                    </button>
+                                                        class="text-xs text-red-600 font-medium hover:underline mt-2">Batalkan
+                                                        Upload</button>
                                                 </div>
-
-                                                {{-- KONDISI 2: ADA GAMBAR LAMA DARI DB (EDIT MODE) --}}
-                                            @elseif($postId && $image && is_string($image))
+                                            @elseif ($oldImage)
                                                 <div class="relative">
-                                                    <img src="{{ asset('storage/' . $image) }}"
+                                                    <img src="{{ asset('storage/' . $oldImage) }}"
                                                         class="mx-auto h-32 object-cover rounded-lg shadow-sm">
-
-                                                    <div class="mt-2">
-                                                        <label for="file-upload-replace"
-                                                            class="cursor-pointer text-xs text-primary-600 font-bold hover:underline z-10 relative">
-                                                            Ganti Gambar
-                                                            <input id="file-upload-replace" wire:model="image"
-                                                                type="file" class="sr-only"
-                                                                accept="image/png, image/jpeg, image/jpg, image/webp">
-                                                        </label>
-                                                    </div>
-
-                                                    <div x-show="isUploading"
-                                                        class="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl z-20">
-                                                        <div class="text-center">
-                                                            <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto"
-                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                viewBox="0 0 24 24">
-                                                                <circle class="opacity-25" cx="12"
-                                                                    cy="12" r="10" stroke="currentColor"
-                                                                    stroke-width="4"></circle>
-                                                                <path class="opacity-75" fill="currentColor"
-                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                                </path>
-                                                            </svg>
-                                                            <p class="text-xs text-primary-600 mt-2 font-medium"
-                                                                x-text="progress + '%'"></p>
-                                                        </div>
-                                                    </div>
+                                                    <p class="text-xs text-gray-500 mt-2">Gambar saat ini</p>
+                                                    <label for="file-upload"
+                                                        class="cursor-pointer text-xs text-primary-600 font-bold hover:underline">Ganti
+                                                        Gambar</label>
                                                 </div>
-
-                                                {{-- KONDISI 3: BELUM ADA GAMBAR (FORM INPUT) --}}
                                             @else
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
                                                     fill="none" viewBox="0 0 48 48">
@@ -439,47 +377,43 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                                         stroke-width="2" stroke-linecap="round"
                                                         stroke-linejoin="round" />
                                                 </svg>
-
                                                 <div class="flex text-sm text-gray-600 justify-center mt-2">
                                                     <label for="file-upload"
-                                                        class="relative cursor-pointer rounded-md font-bold text-primary-600 hover:text-primary-500 focus-within:outline-none">
+                                                        class="relative cursor-pointer font-bold text-primary-600 hover:text-primary-500">
                                                         <span>Upload gambar</span>
-                                                        <input id="file-upload" wire:model="image" type="file"
-                                                            class="sr-only"
-                                                            accept="image/png, image/jpeg, image/jpg, image/webp">
                                                     </label>
                                                 </div>
-                                                <p class="text-xs text-gray-500 mt-1">PNG, JPG max 2MB</p>
-
-                                                {{-- SPINNER UTAMA (DIPINDAHKAN KE SINI) --}}
-                                                {{-- Karena ada di dalam @else, saat gambar jadi preview, elemen ini musnah --}}
-                                                <div x-show="isUploading"
-                                                    class="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl z-20">
-                                                    <div class="text-center">
-                                                        <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 24 24">
-                                                            <circle class="opacity-25" cx="12" cy="12"
-                                                                r="10" stroke="currentColor" stroke-width="4">
-                                                            </circle>
-                                                            <path class="opacity-75" fill="currentColor"
-                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                            </path>
-                                                        </svg>
-                                                        <p class="text-xs text-primary-600 mt-2 font-medium"
-                                                            x-text="progress + '%'"></p>
-                                                    </div>
-                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1">PNG, JPG max 10MB</p>
                                             @endif
+                                            <input id="file-upload" wire:model="image" type="file"
+                                                class="sr-only" accept="image/png, image/jpeg, image/jpg, image/webp">
+
+                                            <div x-show="isUploading"
+                                                class="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl z-20">
+                                                <div class="text-center">
+                                                    <svg class="animate-spin h-8 w-8 text-primary-600 mx-auto"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12"
+                                                            r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                        </path>
+                                                    </svg>
+                                                    <p class="text-xs text-primary-600 mt-2 font-medium"
+                                                        x-text="progress + '%'"></p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     @error('image')
                                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                     @enderror
                                 </div>
+
+                                {{-- Quill Editor --}}
                                 <div wire:ignore>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Konten Berita</label>
-
                                     <div class="bg-white" x-data="{
                                         content: @entangle('content'),
                                         initQuill() {
@@ -497,23 +431,16 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                                     ]
                                                 }
                                             });
-                                    
-                                            if (this.content) {
-                                                editor.root.innerHTML = this.content;
-                                            }
-                                    
-                                            editor.on('text-change', () => {
-                                                this.content = editor.root.innerHTML;
-                                            });
+                                            if (this.content) { editor.root.innerHTML = this.content; }
+                                            editor.on('text-change', () => { this.content = editor.root.innerHTML; });
                                         }
                                     }" x-init="initQuill()">
                                         <div
-                                            class="rounded-xl border border-gray-300 overflow-hidden focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500 transition-all">
+                                            class="rounded-xl border border-gray-300 overflow-hidden focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500">
                                             <div x-ref="quillEditor" class="h-96 text-base text-gray-700 bg-white">
                                             </div>
                                         </div>
                                     </div>
-
                                     @error('content')
                                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                     @enderror
@@ -529,72 +456,11 @@ new #[Layout('layouts.admin')] #[Title('Kelola Berita - Kebun Raya')] class exte
                                 <span wire:loading>Menyimpan...</span>
                             </button>
                             <button wire:click="$set('showModal', false)" type="button"
-                                class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Batal
-                            </button>
+                                class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
     @endif
-
-    @if ($showDeleteModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-
-                <div wire:click="$set('showDeleteModal', false)"
-                    class="fixed inset-0 transition-opacity" 
-     style="background-color: rgba(0, 0, 0, 0.5);"
-     aria-hidden="true">
-                </div>
-
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <div
-                    class="relative z-50 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div
-                                class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                    Hapus Berita
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500">
-                                        Apakah Anda yakin ingin menghapus berita ini? Data yang dihapus tidak dapat
-                                        dikembalikan.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                        <button wire:click="delete" type="button"
-                            class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Ya, Hapus
-                        </button>
-                        <button wire:click="$set('showDeleteModal', false)" type="button"
-                            class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Batal
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
 </div>
