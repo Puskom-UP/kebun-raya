@@ -70,7 +70,7 @@
 
                  <p
                      class="text-lg md:text-xl text-primary-100/90 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
-                    {{ $site->description }}
+                    {{ $site->description ?? '-' }}
                  </p>
 
                  <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
