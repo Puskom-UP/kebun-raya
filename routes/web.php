@@ -26,4 +26,6 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('/admin', 'admin.dashboard')->name('dashboard');
     Route::livewire('/admin/berita', 'admin.berita')->name('berita');
     Route::livewire('/admin/setting', 'admin.pengaturan.index')->name('pengaturan');
+
+     Route::livewire('/admin/mitra', 'admin.mitra')->name('mitra');
 });

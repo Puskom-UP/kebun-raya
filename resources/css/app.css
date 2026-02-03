@@ -26,6 +26,17 @@
     --color-accent-400: #a3e635;
     --color-accent-500: #84cc16;
     --color-accent-600: #65a30d;
+    --animate-marquee: marquee 40s linear infinite;
+}
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
 }
 
 /* Custom Animations */

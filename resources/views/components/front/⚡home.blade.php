@@ -5,7 +5,8 @@
  use App\Models\Post;
  use App\Models\SiteSetting;
  
- new #[Layout('layouts.front')] class extends Component {
+ new #[Layout('layouts.front')] 
+ class extends Component {
      #[Computed]
      public function posts()
      {
@@ -18,6 +19,13 @@
              'site' => SiteSetting::first(),
          ];
      }
+     public $partners = [
+         ['name' => 'Universitas Pahlawan', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png'], // Ganti dengan logo UP
+         ['name' => 'Kementerian LHK', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1280px-Microsoft_logo_%282012%29.svg.png'],
+         ['name' => 'BRIN', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Samsung_Logo.svg/2560px-Samsung_Logo.svg.png'],
+         ['name' => 'Pemprov Riau', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png'],
+         ['name' => 'Bank Riau Kepri', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1280px-Netflix_2015_logo.svg.png'],
+     ];
  };
  ?>
  <div>
@@ -50,27 +58,26 @@
                  @php
                      $fullName = $site->site_name ?? 'Kebun Raya | Universitas Pahlawan';
 
-                   
                      $parts = explode('|', $fullName);
                      $part1 = trim($parts[0]);
                      $part2 = isset($parts[1]) ? trim($parts[1]) : '';
                  @endphp
-               <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
-    {{-- Baris Pertama (Putih Polos) --}}
-    {{ $part1 }}
-    
-    @if($part2)
-        <br>
-        {{-- Baris Kedua (Gradient Text) --}}
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-200 to-white">
-            {{ $part2 }}
-        </span>
-    @endif
-</h1>
+                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+                     {{-- Baris Pertama (Putih Polos) --}}
+                     {{ $part1 }}
+
+                     @if ($part2)
+                         <br>
+                         {{-- Baris Kedua (Gradient Text) --}}
+                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-200 to-white">
+                             {{ $part2 }}
+                         </span>
+                     @endif
+                 </h1>
 
                  <p
                      class="text-lg md:text-xl text-primary-100/90 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
-                    {{ $site->description ?? '-' }}
+                     {{ $site->description ?? '-' }}
                  </p>
 
                  <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -511,6 +518,60 @@
                      <span class="font-bold text-lg">Facebook</span>
                  </a>
              </div>
+         </div>
+     </section>
+
+     <section class="py-16 bg-white border-t border-gray-100">
+         <div class="container mx-auto px-6 mb-10">
+             <div class="text-center max-w-2xl mx-auto">
+                 <h2 class="text-primary-600 font-bold tracking-widest uppercase text-xs mb-3">
+                     Jaringan & Kolaborasi
+                 </h2>
+                 <h3 class="text-2xl md:text-3xl font-bold text-gray-900">
+                     Mitra Strategis Kami
+                 </h3>
+             </div>
+         </div>
+
+         <div class="relative flex overflow-x-hidden group/marquee"
+             style="-webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);">
+
+             <div class="flex gap-8 w-full">
+
+
+                 <div
+                     class="flex min-w-full shrink-0 items-center gap-8 animate-marquee group-hover/marquee:[animation-play-state:paused]">
+                     @foreach ($partners as $partner)
+                         <div
+                             class="group relative flex items-center justify-center w-52 h-32 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                             <img src="{{ $partner['logo'] }}" alt="{{ $partner['name'] }}"
+                                 class="max-h-16 w-auto max-w-[80%] filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
+                                 title="{{ $partner['name'] }}">
+                         </div>
+                     @endforeach
+                 </div>
+
+
+                 <div class="flex min-w-full shrink-0 items-center gap-8 animate-marquee group-hover/marquee:[animation-play-state:paused]"
+                     aria-hidden="true">
+                     @foreach ($partners as $partner)
+                         <div
+                             class="group relative flex items-center justify-center w-52 h-32 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                             <img src="{{ $partner['logo'] }}" alt="{{ $partner['name'] }}"
+                                 class="max-h-16 w-auto max-w-[80%] filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
+                                 title="{{ $partner['name'] }}">
+                         </div>
+                     @endforeach
+                 </div>
+
+             </div>
+         </div>
+         <div class="mt-12 text-center">
+             <a href="#"
+                 class="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-semibold rounded-full text-sm hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-all shadow-sm">
+                 <span>Ingin menjalin kerjasama?</span>
+                 <span class="text-primary-600 font-bold">Hubungi Kami &rarr;</span>
+             </a>
          </div>
      </section>
  </div>
