@@ -3,6 +3,7 @@
  use Livewire\Attributes\Computed;
  use Livewire\Component;
  use App\Models\Post;
+ use App\Models\Partner;
  use App\Models\SiteSetting;
  
  new #[Layout('layouts.front')] 
@@ -10,22 +11,17 @@
      #[Computed]
      public function posts()
      {
-         return Post::all();
+         return Post::where('status', 'published')->latest()->take(6)->get();
      }
  
      public function with()
      {
          return [
-             'site' => SiteSetting::first(),
+             'site' => SiteSetting::first() ?? new SiteSetting(),
+ 
+             'partners' => Partner::where('status', 'published')->latest()->get(),
          ];
      }
-     public $partners = [
-         ['name' => 'Universitas Pahlawan', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png'], // Ganti dengan logo UP
-         ['name' => 'Kementerian LHK', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1280px-Microsoft_logo_%282012%29.svg.png'],
-         ['name' => 'BRIN', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Samsung_Logo.svg/2560px-Samsung_Logo.svg.png'],
-         ['name' => 'Pemprov Riau', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/2560px-Amazon_logo.svg.png'],
-         ['name' => 'Bank Riau Kepri', 'logo' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1280px-Netflix_2015_logo.svg.png'],
-     ];
  };
  ?>
  <div>
@@ -77,11 +73,9 @@
 
                  <p
                      class="text-lg md:text-xl text-primary-100/90 max-w-3xl mx-auto mb-10 leading-relaxed drop-shadow-md">
-<<<<<<< Updated upstream
+
                      {{ $site->description ?? '-' }}
-=======
-                     {{ $site->description }}
->>>>>>> Stashed changes
+
                  </p>
 
                  <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -467,7 +461,7 @@
              </div>
 
              <div class="text-center mt-12">
-                 <a href="#"
+                 <a href="{{ route('news.index') }}" wire:navigate
                      class="inline-block px-8 py-3 border border-primary-600 text-primary-600 font-semibold rounded-xl hover:bg-primary-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-lg">
                      Lihat Semua Berita
                  </a>
@@ -548,7 +542,7 @@
                      @foreach ($partners as $partner)
                          <div
                              class="group relative flex items-center justify-center w-52 h-32 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                             <img src="{{ $partner['logo'] }}" alt="{{ $partner['name'] }}"
+                             <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner['name'] }}"
                                  class="max-h-16 w-auto max-w-[80%] filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
                                  title="{{ $partner['name'] }}">
                          </div>
@@ -561,7 +555,7 @@
                      @foreach ($partners as $partner)
                          <div
                              class="group relative flex items-center justify-center w-52 h-32 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                             <img src="{{ $partner['logo'] }}" alt="{{ $partner['name'] }}"
+                             <img src="{{ asset('storage/' . $partner->logo) }}" alt="{{ $partner['name'] }}"
                                  class="max-h-16 w-auto max-w-[80%] filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition duration-500"
                                  title="{{ $partner['name'] }}">
                          </div>

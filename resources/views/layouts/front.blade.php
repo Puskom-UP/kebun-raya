@@ -3,6 +3,7 @@
 @php
     $site = \App\Models\SiteSetting::first();
 @endphp
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,119 +25,124 @@
 <body class="bg-gray-50 font-sans antialiased">
 
     <!-- Sticky Navbar -->
-  <header 
-    x-data="{ 
-        isScrolled: false, 
-        mobileOpen: false 
-    }" 
-    @scroll.window="isScrolled = (window.pageYOffset > 20)"
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out"
-    :class="isScrolled 
-        ? 'bg-white/90 backdrop-blur-md shadow-md py-2' 
-        : 'bg-primary-900/30 backdrop-blur-md border-b border-white/10 py-4'"
->
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-12 md:h-14">
-            
-            <a href="/" class="flex items-center space-x-3 group">
-                <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo"
-                    class="h-10 w-10 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110" 
-                    onerror="this.style.display='none'">
-                
-                <div class="hidden sm:block">
-                    <span 
-                        class="block font-bold text-lg leading-tight transition-colors duration-300"
-                        :class="isScrolled ? 'text-primary-900' : 'text-white drop-shadow-md'"
-                    >
-                        Kebun Raya
-                    </span>
-                    <span 
-                        class="block text-xs font-medium transition-colors duration-300"
-                        :class="isScrolled ? 'text-primary-600' : 'text-primary-200'"
-                    >
-                        Universitas Pahlawan
-                    </span>
+    <header x-data="{
+        isScrolled: false,
+        mobileOpen: false
+    }" @scroll.window="isScrolled = (window.pageYOffset > 20)"
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out"
+        :class="isScrolled
+            ?
+            'bg-white/90 backdrop-blur-md shadow-md py-2' :
+            'bg-primary-900/30 backdrop-blur-md border-b border-white/10 py-4'">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-12 md:h-14">
+
+                <a href="/" class="flex items-center space-x-3 group">
+                    <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo"
+                        class="h-10 w-10 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110"
+                        onerror="this.style.display='none'">
+
+                    <div class="hidden sm:block">
+                        <span class="block font-bold text-lg leading-tight transition-colors duration-300"
+                            :class="isScrolled ? 'text-primary-900' : 'text-white drop-shadow-md'">
+                            Kebun Raya
+                        </span>
+                        <span class="block text-xs font-medium transition-colors duration-300"
+                            :class="isScrolled ? 'text-primary-600' : 'text-primary-200'">
+                            Universitas Pahlawan
+                        </span>
+                    </div>
+                </a>
+
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="{{ route('tentang-kami') }}" wire:navigate
+                        class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                        :class="isScrolled ? 'text-gray-600 hover:text-primary-700' :
+                            'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                        Tentang Kami
+                    </a>
+
+                    <a href="{{ route('news.index') }}" wire:navigate
+                        class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                        Berita
+                    </a>
+                    <a href="#" class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                        :class="isScrolled ? 'text-gray-600 hover:text-primary-700' :
+                            'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                        Repositori
+                    </a>
+
+                    <a href="#fungsi" class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                        :class="isScrolled ? 'text-gray-600 hover:text-primary-700' :
+                            'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                        Fungsi
+                    </a>
+
+                    <a href="#kontak" class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                        :class="isScrolled ? 'text-gray-600 hover:text-primary-700' :
+                            'text-white/90 hover:text-white hover:drop-shadow-lg'">
+                        kontak
+                    </a>
+
+                    <a href="/login" wire:navigate
+                        class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 shadow-sm"
+                        :class="isScrolled
+                            ?
+                            'bg-primary-600 text-white hover:bg-primary-700' :
+                            'bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm'">
+                        Login
+                    </a>
                 </div>
-            </a>
 
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="{{ route('tentang-kami') }}" wire:navigate
-                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
-                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
-                   Tentang Kami
-                </a>
-                
-                <a href="#"
-                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
-                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
-                   Repositori
-                </a>
-                
-                <a href="#fungsi" 
-                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
-                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
-                   Fungsi
-                </a>
-
-                 <a href="#kontak" 
-                   class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
-                   :class="isScrolled ? 'text-gray-600 hover:text-primary-700' : 'text-white/90 hover:text-white hover:drop-shadow-lg'">
-                   kontak
-                </a>
-                
-                <a href="/login" wire:navigate 
-                   class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 shadow-sm"
-                   :class="isScrolled 
-                        ? 'bg-primary-600 text-white hover:bg-primary-700' 
-                        : 'bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm'">
-                   Login
-                </a>
+                <button @click="mobileOpen = !mobileOpen"
+                    class="md:hidden p-2 rounded-lg transition-colors focus:outline-none"
+                    :class="isScrolled ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
 
-            <button 
-                @click="mobileOpen = !mobileOpen" 
-                class="md:hidden p-2 rounded-lg transition-colors focus:outline-none"
-                :class="isScrolled ? 'text-gray-800 hover:bg-gray-100' : 'text-white hover:bg-white/10'"
-            >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
+            <div x-show="mobileOpen" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+                class="md:hidden mt-2 bg-primary-900/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                style="display: none;">
+                <div class="flex flex-col py-2">
+                    <a href="{{ route('tentang-kami') }}" wire:navigate
+                        class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                        Tentang Kami
+                    </a>
+                    <a href="{{ route('news.index') }}" wire:navigate
+                        class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                        Berita
+                    </a>
+                    <a href="#"
+                        class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                        Repositori
+                    </a>
+                    <a href="#fungsi"
+                        class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                        Fungsi
+                    </a>
+                    <a href="#kontak" class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium">
+                        Kontak
+                    </a>
 
-        <div 
-            x-show="mobileOpen" 
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
-            class="md:hidden mt-2 bg-primary-900/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden"
-            style="display: none;" 
-        >
-            <div class="flex flex-col py-2">
-                <a href="{{ route('tentang-kami') }}" wire:navigate
-                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
-                    Tentang Kami
-                </a>
-                <a href="#"
-                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
-                    Repositori
-                </a>
-                <a href="#fungsi"
-                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
-                    Fungsi
-                </a>
-                <a href="#kontak"
-                    class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium">
-                    Kontak
-                </a>
+                    <a href="/login" wire:navigate
+                        class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 shadow-sm"
+                        :class="isScrolled
+                            ?
+                            'bg-primary-600 text-white hover:bg-primary-700' :
+                            'bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm'">
+                        Login
+                    </a>
+                </div>
             </div>
-        </div>
-    </nav>
-</header>
+        </nav>
+    </header>
 
     {{-- SLOT --}}
 
@@ -157,7 +163,7 @@
                         </div>
                     </div>
                     <p class="text-gray-400 leading-relaxed mb-6 max-w-md">
-                       {{ $site->description ?? '-' }}
+                        {{ $site->description ?? '-' }}
                     </p>
                     <div class="flex space-x-4">
                         <a href="#"
@@ -188,8 +194,10 @@
                 <div>
                     <h4 class="text-lg font-semibold mb-6">Navigasi</h4>
                     <ul class="space-y-4">
-                        <li><a href="/" class="text-gray-400 hover:text-white transition-colors">Beranda</a></li>
-                        <li><a href="/about" class="text-gray-400 hover:text-white transition-colors">Tentang Kami</a>
+                        <li><a href="/" class="text-gray-400 hover:text-white transition-colors">Beranda</a>
+                        </li>
+                        <li><a href="/about" class="text-gray-400 hover:text-white transition-colors">Tentang
+                                Kami</a>
                         </li>
                         <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Repositori</a>
                         </li>
@@ -290,12 +298,12 @@
             });
         }
 
- 
+
         document.addEventListener('DOMContentLoaded', () => {
             initCustomScripts();
         });
 
-      
+
         document.addEventListener('livewire:navigated', () => {
             initCustomScripts();
         });
