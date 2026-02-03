@@ -10,12 +10,8 @@ use App\Models\SiteSetting;
 new #[Layout('layouts.front')] 
 class extends Component {
     use WithPagination;
-
-    // Menyimpan query pencarian di URL agar bisa dishare
     #[Url(history: true)]
     public $search = '';
-
-    // Reset pagination ke halaman 1 jika user mengetik pencarian
     public function updatedSearch()
     {
         $this->resetPage();
@@ -24,15 +20,14 @@ class extends Component {
     public function with()
     {
         return [
-            // Mengambil berita status published, difilter search, diurutkan terbaru
-            'posts' => Post::with('category') // Eager load kategori agar query ringan
+            'posts' => Post::with('category') 
                 ->where('status', 'published')
                 ->when($this->search, function($query) {
                     $query->where('title', 'like', '%' . $this->search . '%')
                           ->orWhere('content', 'like', '%' . $this->search . '%');
                 })
                 ->latest()
-                ->paginate(9), // Menampilkan 9 berita per halaman
+                ->paginate(9),
                 
             'site' => SiteSetting::first(),
         ];
@@ -140,7 +135,7 @@ class extends Component {
 
                 <div class="mt-16">
                     {{ $posts->links() }} 
-                    {{-- Pastikan Anda sudah publish vendor pagination tailwind: php artisan vendor:publish --tag=laravel-pagination --}}
+
                 </div>
 
             @else
@@ -170,3 +165,4 @@ class extends Component {
         </div>
     </section>
 </div>
+{{-- php artisan vendor:publish --tag=laravel-pagination --}}
