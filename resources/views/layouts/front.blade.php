@@ -62,8 +62,11 @@
                         Tentang Kami
                     </a>
 
+
                     <a href="{{ route('news.index') }}" wire:navigate
-                        class="px-4 py-3 text-white hover:bg-white/10 transition-colors font-medium border-b border-white/5">
+                        class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
+                        :class="isScrolled ? 'text-gray-600 hover:text-primary-700' :
+                            'text-white/90 hover:text-white hover:drop-shadow-lg'">
                         Berita
                     </a>
                     <a href="#" class="font-medium text-sm transition-all duration-300 hover:-translate-y-0.5"
