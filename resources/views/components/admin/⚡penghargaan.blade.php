@@ -6,41 +6,46 @@ use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Partner;
+use App\Models\Penghargaan;
 
-new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class extends Component {
+new #[Layout('layouts.admin')] #[Title('Kelola Penghargaan - Kebun Raya')] class extends Component {
     use WithPagination, WithFileUploads;
 
-   
     public $showModal = false;
     public $showDeleteModal = false;
     public $isEditMode = false;
     public $deleteId = null;
     public $search = '';
 
-    public $partnerId;
+    public $penghargaanId;
 
-   
     #[Rule('required|min:3')]
-    public $name = ''; 
+    public $nama_penghargaan = '';
 
-    #[Rule('nullable|url')]
-    public $url = ''; 
-    // Max 2MB
+    #[Rule('nullable|string')]
+    public $peringkat = '';
 
-    #[Rule('nullable|image|max:2048')]
-    public $logo; 
+    #[Rule('nullable|string|max:500')]
+    public $deskripsi = '';
 
-    public $oldLogo; 
+    #[Rule('nullable|string')]
+    public $icon = '';
 
-    public $status = 'published'; 
+    #[Rule('nullable|string')]
+    public $warna = '';
 
-    // --- Methods ---
+    public $oldfile_sertifikat; 
 
+    #[Rule('required|file|mimes:pdf,jpg,jpeg,png,webp|max:5120')]
+    public $file_sertifikat;
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
     public function resetForm()
     {
-        $this->reset(['name', 'url', 'logo', 'oldLogo', 'status', 'partnerId', 'isEditMode']);
+        $this->reset(['nama_penghargaan', 'peringkat', 'deskripsi', 'warna', 'icon', 'file_sertifikat', 'penghargaanId', 'isEditMode']);
         $this->resetValidation();
     }
 
@@ -53,14 +58,16 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
     public function edit($id)
     {
         $this->resetForm();
-        $partner = Partner::find($id);
+        $data = Penghargaan::find($id);
 
-        $this->partnerId = $partner->id;
-        $this->name = $partner->name;
-        $this->url = $partner->url;
-        $this->status = $partner->status ?? 'published'; 
-        $this->oldLogo = $partner->logo;
-        $this->logo = null;
+        $this->penghargaanId = $data->id;
+        $this->nama_penghargaan = $data->nama_penghargaan;
+        $this->peringkat = $data->peringkat;
+        $this->deskripsi = $data->deskripsi;
+        $this->icon = $data->icon;
+        $this->warna = $data->warna;
+        $this->oldfile_sertifikat = $data->file_sertifikat;
+        $this->file_sertifikat = null;
 
         $this->isEditMode = true;
         $this->showModal = true;
@@ -71,31 +78,26 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
         $this->validate();
 
         $data = [
-            'name' => $this->name,
-            'url' => $this->url,
-            'status' => $this->status,
+            'nama_penghargaan' => $this->nama_penghargaan,
+            'peringkat' => $this->peringkat,
+            'deskripsi' => $this->deskripsi,
+            'warna' => $this->warna,
+            'icon' => $this->icon,
+            'file_sertifikat' => $this->file_sertifikat,
         ];
 
-    
-        if ($this->logo) {
-     
-            if ($this->isEditMode && $this->oldLogo) {
-                Storage::disk('public')->delete($this->oldLogo);
+        if ($this->file_sertifikat) {
+            if ($this->isEditMode && $this->oldfile_sertifikat) {
+                Storage::disk('public')->delete($this->oldfile_sertifikat);
             }
-            $data['logo'] = $this->logo->store('partners', 'public');
+            $data['file_sertifikat'] = $this->file_sertifikat->store('sertifikat', 'public');
         }
-
         if ($this->isEditMode) {
-            Partner::where('id', $this->partnerId)->update($data);
-            $message = 'Mitra berhasil diperbarui!';
+            Penghargaan::where('id', $this->penghargaanId)->update($data);
+            $message = 'Penghargaan berhasil diperbarui!';
         } else {
-            
-            if (!$this->logo) {
-                $this->addError('logo', 'Logo mitra wajib diupload.');
-                return;
-            }
-            Partner::create($data);
-            $message = 'Mitra berhasil ditambahkan!';
+            Penghargaan::create($data);
+            $message = 'Penghargaan berhasil ditambahkan!';
         }
 
         $this->showModal = false;
@@ -110,20 +112,16 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
 
     public function delete()
     {
-        $partner = Partner::find($this->deleteId);
-        if ($partner->logo) {
-            Storage::disk('public')->delete($partner->logo);
-        }
-        $partner->delete();
-
+        Penghargaan::find($this->deleteId)->delete();
         $this->showDeleteModal = false;
-        session()->flash('message', 'Mitra berhasil dihapus.');
+        session()->flash('message', 'Penghargaan berhasil dihapus.');
     }
 
     public function with()
     {
         return [
-            'partners' => Partner::where('name', 'like', '%' . $this->search . '%')
+            'penghargaans' => Penghargaan::where('nama_penghargaan', 'like', '%' . $this->search . '%')
+                ->orWhere('peringkat', 'like', '%' . $this->search . '%')
                 ->latest()
                 ->paginate(10),
         ];
@@ -135,15 +133,15 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
     {{-- Header Section --}}
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Kelola Mitra Kerjasama</h1>
-            <p class="text-gray-500 mt-1">Atur logo dan link mitra strategis Kebun Raya.</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Prestasi & Penghargaan</h1>
+            <p class="text-gray-500 mt-1">Kelola daftar pencapaian dan penghargaan Kebun Raya.</p>
         </div>
         <button wire:click="create"
             class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 bg-primary-900 rounded-xl hover:bg-primary-800 shadow-lg shadow-primary-900/20">
             <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            Tambah Mitra
+            Catat Prestasi
         </button>
     </div>
 
@@ -173,7 +171,7 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                 </div>
                 <input wire:model.live.debounce.300ms="search" type="text"
                     class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 sm:text-sm"
-                    placeholder="Cari nama mitra...">
+                    placeholder="Cari prestasi...">
             </div>
         </div>
 
@@ -182,75 +180,51 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-                        <th class="px-6 py-4 font-semibold">Mitra / Instansi</th>
-                        <th class="px-6 py-4 font-semibold">Website</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 font-semibold">Tanggal</th>
+                        <th class="px-6 py-4 font-semibold">Nama Penghargaan</th>
+                        <th class="px-6 py-4 font-semibold">Peringkat</th>
+                        <th class="px-6 py-4 font-semibold">Deskripsi Singkat</th>
                         <th class="px-6 py-4 font-semibold text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-sm">
-                    @forelse($partners as $partner)
+                    @forelse($penghargaans as $item)
                         <tr class="group hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-4">
-                                    {{-- Logo Box --}}
                                     <div
-                                        class="w-16 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200 p-1 flex items-center justify-center">
-                                        @if ($partner->logo)
-                                            <img src="{{ asset('storage/' . $partner->logo) }}"
-                                                class="max-w-full max-h-full object-contain">
-                                        @else
-                                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                </path>
-                                            </svg>
-                                        @endif
+                                        class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0 text-yellow-600 border border-yellow-100">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <h4
-                                            class="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors line-clamp-1">
-                                            {{ $partner->name }}
+                                            class="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">
+                                            {{ $item->nama_penghargaan }}
                                         </h4>
+                                        <p class="text-xs text-gray-400 mt-0.5">ID: #{{ $item->id }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                @if ($partner->url)
-                                    <a href="{{ $partner->url }}" target="_blank"
-                                        class="text-primary-600 hover:underline flex items-center gap-1">
-                                        Kunjungi
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
-                                            </path>
-                                        </svg>
-                                    </a>
-                                @else
-                                    -
-                                @endif
-                            </td>
                             <td class="px-6 py-4">
-                                @if ($partner->status === 'published')
+                                @if ($item->peringkat)
                                     <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-600"></span> Aktif
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                        {{ $item->peringkat }}
                                     </span>
                                 @else
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span> Non-Aktif
-                                    </span>
+                                    <span class="text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 text-gray-500">
-                                {{ \Carbon\Carbon::parse($partner->created_at)->translatedFormat('d M Y') }}
+                            <td class="px-6 py-4 text-gray-500 max-w-xs truncate">
+                                {{ $item->deskripsi ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button wire:click="edit({{ $partner->id }})"
+                                    <button wire:click="edit({{ $item->id }})"
                                         class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                                         title="Edit">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +233,7 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                                             </path>
                                         </svg>
                                     </button>
-                                    <button wire:click="confirmDelete({{ $partner->id }})"
+                                    <button wire:click="confirmDelete({{ $item->id }})"
                                         class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                         title="Hapus">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,8 +247,19 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                <p class="text-sm mt-1">Belum ada mitra kerjasama.</p>
+                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div
+                                        class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm font-medium">Belum ada data penghargaan.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -283,7 +268,7 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
         </div>
 
         <div class="px-6 py-4 border-t border-gray-100">
-            {{ $partners->links() }}
+            {{ $penghargaans->links() }}
         </div>
     </div>
 
@@ -297,63 +282,67 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
                     <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100">
+                        class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-100">
 
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-100">
                             <h3 class="text-xl font-bold text-gray-900">
-                                {{ $isEditMode ? 'Edit Mitra' : 'Tambah Mitra Baru' }}
+                                {{ $isEditMode ? 'Edit Penghargaan' : 'Tambah Penghargaan Baru' }}
                             </h3>
                         </div>
 
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
                             <form wire:submit="save" class="space-y-6">
 
-                                {{-- Nama Mitra --}}
+                                {{-- Nama Penghargaan --}}
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Mitra /
-                                        Instansi</label>
-                                    <input wire:model="name" type="text"
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama
+                                        Penghargaan</label>
+                                    <input wire:model="nama_penghargaan" type="text"
                                         class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4"
-                                        placeholder="Contoh: Universitas Pahlawan">
-                                    @error('name')
+                                        placeholder="Contoh: Kebun Raya Daerah Terbaik 2023">
+                                    @error('nama_penghargaan')
                                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                     @enderror
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Peringkat --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Peringkat / Kategori
+                                        (Opsional)</label>
+                                    <input wire:model="peringkat" type="text"
+                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4"
+                                        placeholder="Contoh: Terbaik 3 Tingkat Provinsi, Gold Medal, dll">
+                                    @error('peringkat')
+                                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Link Website
-                                            (Opsional)</label>
-                                        <input wire:model="url" type="url"
-                                            class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4"
-                                            placeholder="https://...">
-                                        @error('url')
-                                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                                        @enderror
-                                    </div>
 
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Status
-                                            Tampilan</label>
-                                        <div
-                                            class="flex items-center space-x-4 mt-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                                            <label class="flex items-center cursor-pointer">
-                                                <input type="radio" wire:model="status" value="published"
-                                                    class="text-primary-600 focus:ring-primary-500 border-gray-300">
-                                                <span class="ml-2 text-sm text-gray-700">Aktif</span>
-                                            </label>
-                                            <label class="flex items-center cursor-pointer">
-                                                <input type="radio" wire:model="status" value="draft"
-                                                    class="text-gray-600 focus:ring-gray-500 border-gray-300">
-                                                <span class="ml-2 text-sm text-gray-700">Sembunyikan</span>
-                                            </label>
-                                        </div>
-                                    </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Icon
+                                        (Opsional)</label>
+                                    <input wire:model="icon" type="text"
+                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4"
+                                        placeholder="Masukan code icon dalam bentuk SVG">
+                                    @error('icon')
+                                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                    @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Logo Mitra</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Warna
+                                        (Opsional)</label>
+                                    <input wire:model="warna" type="text"
+                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4"
+                                        placeholder="Contoh: yellow-600, blue-500, red-400">
+                                    @error('warna')
+                                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Sertifikat
+                                        Penghargaan</label>
                                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:bg-gray-50 transition-all cursor-pointer relative"
                                         x-data="{ isUploading: false, progress: 0 }" x-on:livewire-upload-start="isUploading = true"
                                         x-on:livewire-upload-finish="isUploading = false"
@@ -361,22 +350,22 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                                         x-on:livewire-upload-progress="progress = $event.detail.progress">
 
                                         <div class="space-y-1 text-center w-full">
-                                            @if ($logo)
+                                            @if ($file_sertifikat)
                                                 <div class="relative">
-                                                    <img src="{{ $logo->temporaryUrl() }}"
+                                                    <img src="{{ $file_sertifikat->temporaryUrl() }}"
                                                         class="mx-auto h-32 object-contain rounded-lg shadow-sm bg-gray-100 p-2">
-                                                    <button wire:click="$set('logo', null)" type="button"
+                                                    <button wire:click="$set('file_sertifikat', null)" type="button"
                                                         class="text-xs text-red-600 font-medium hover:underline mt-2">Batalkan
                                                         Upload</button>
                                                 </div>
-                                            @elseif ($oldLogo)
+                                            @elseif ($oldfile_sertifikat)
                                                 <div class="relative">
-                                                    <img src="{{ asset('storage/' . $oldLogo) }}"
+                                                    <img src="{{ asset('storage/' . $oldfile_sertifikat) }}"
                                                         class="mx-auto h-32 object-contain rounded-lg shadow-sm bg-gray-100 p-2">
-                                                    <p class="text-xs text-gray-500 mt-2">Logo saat ini</p>
+                                                    <p class="text-xs text-gray-500 mt-2">Sertifikat saat ini</p>
                                                     <label for="file-upload"
                                                         class="cursor-pointer text-xs text-primary-600 font-bold hover:underline">Ganti
-                                                        Logo</label>
+                                                        Sertifikat</label>
                                                 </div>
                                             @else
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor"
@@ -389,17 +378,19 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                                                 <div class="flex text-sm text-gray-600 justify-center mt-2">
                                                     <label for="file-upload"
                                                         class="relative cursor-pointer font-bold text-primary-600 hover:text-primary-500">
-                                                        <span>Upload logo</span>
+                                                        <span>Upload Sertifikat</span>
                                                     </label>
                                                 </div>
-                                                <p class="text-xs text-gray-500 mt-1">PNG, JPG (Transparan lebih baik)
+                                                <p class="text-xs text-gray-500 mt-1">PDF,PNG, JPG (Transparan lebih
+                                                    baik)
                                                 </p>
                                             @endif
 
-                                            <input id="file-upload" wire:model="logo" type="file" class="sr-only"
-                                                accept="image/png, image/jpeg, image/jpg, image/webp">
+                                            <input id="file-upload" wire:model="file_sertifikat" type="file"
+                                                class="sr-only"
+                                                accept="image/png, image/jpeg, image/jpg, image/webp, application/pdf">
 
-                                            {{-- Progress Bar --}}
+
                                             <div x-show="isUploading"
                                                 class="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl z-20">
                                                 <div class="text-center">
@@ -419,6 +410,18 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                                         </div>
                                     </div>
                                     @error('logo')
+                                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                {{-- Deskripsi --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi
+                                        (Opsional)</label>
+                                    <textarea wire:model="deskripsi" rows="3"
+                                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-4"
+                                        placeholder="Tambahkan catatan detail mengenai penghargaan ini..."></textarea>
+                                    @error('deskripsi')
                                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                                     @enderror
                                 </div>
@@ -459,9 +462,9 @@ new #[Layout('layouts.admin')] #[Title('Kelola Mitra - Kebun Raya')] class exten
                                         d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-semibold leading-6 text-gray-900">Hapus Mitra?</h3>
-                            <p class="mt-2 text-sm text-gray-500">Apakah Anda yakin ingin menghapus mitra ini? Data
-                                yang dihapus tidak dapat dikembalikan.</p>
+                            <h3 class="text-lg font-semibold leading-6 text-gray-900">Hapus Penghargaan?</h3>
+                            <p class="mt-2 text-sm text-gray-500">Apakah Anda yakin ingin menghapus data ini? Data yang
+                                dihapus tidak dapat dikembalikan.</p>
                         </div>
                         <div class="mt-6 flex justify-center gap-3">
                             <button wire:click="$set('showDeleteModal', false)" type="button"

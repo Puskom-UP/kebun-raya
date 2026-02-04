@@ -30,4 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::livewire('/admin/setting', 'admin.pengaturan.index')->name('pengaturan');
 
     Route::livewire('/admin/mitra', 'admin.mitra')->name('mitra');
+
+
+    Route::livewire('/admin/penghargaan', 'admin.penghargaan')->name('penghargaan');
 });
