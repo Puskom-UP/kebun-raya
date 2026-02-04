@@ -203,14 +203,19 @@
                              class="absolute top-0 right-0 bg-primary-500 w-16 h-16 rounded-bl-full -mr-8 -mt-8 opacity-10 group-hover:scale-150 transition-transform duration-500">
                          </div>
                          <div
-                             class="w-16 h-16 bg-gradient-to-br from-{{ $penghargaan->warna }}-400 to-{{ $penghargaan->warna }}-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-{{ $penghargaan->warna }}-500/30">
-                             {{-- <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor"
-                                 viewBox="0 0 24 24">
-                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                     d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
-                                 </path>
-                             </svg> --}}
-                             {!! $penghargaan->icon !!}
+                             class="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary-500/30">
+
+
+                             @if ($penghargaan->icon == null)
+                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor"
+                                     viewBox="0 0 24 24">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                         d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
+                                     </path>
+                                 </svg>
+                             @else
+                                 {!! $penghargaan->icon !!}
+                             @endif
 
 
                          </div>
@@ -221,7 +226,7 @@
                          </p>
                      </div>
                  @endforeach
-                
+
              </div>
          </div>
      </section>

@@ -30,8 +30,8 @@
             <div>
                 <div class="h-20 flex items-center px-6 border-b border-white/10 bg-primary-950/50">
                     <a href="/" class="flex items-center space-x-3">
-                        <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo"
-                            class="h-10 w-10 rounded-full border-2 border-primary-400"
+                        <img src="{{ !empty($site->logo) ? asset('storage/' . $site->logo) : asset('assets/images/LogoKebunRaya.jpeg') }}"
+                            alt="Logo" class="h-10 w-10 rounded-full border-2 border-primary-400"
                             onerror="this.style.display='none'">
                         <div>
                             <span class="block font-bold text-lg leading-tight">Kebun Raya</span>
@@ -75,7 +75,7 @@
                         <span class="font-medium">Repositori Flora</span>
                     </a>
 
-                       <a href="{{ route('penghargaan') }}" wire:navigate
+                    <a href="{{ route('penghargaan') }}" wire:navigate
                         class="flex items-center px-4 py-3 rounded-xl text-primary-100 hover:bg-white/10 hover:text-white transition-all duration-200 group">
                         <svg class="w-5 h-5 mr-3 text-primary-400 group-hover:text-white transition-colors"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">

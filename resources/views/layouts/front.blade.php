@@ -10,6 +10,8 @@
     <meta name="description"
         content="Kebun Raya Universitas Pahlawan Tuanku Tambusai - Pusat Konservasi, Penelitian, dan Edukasi Flora">
     <title>{{ $title ?? config('app.name') }}</title>
+ 
+    <link rel="shortcut icon" href="{{ !empty($site->logo) ? asset('storage/' . $site->logo) : asset('favicon.ico') }}" type="image/x-icon">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +40,7 @@
             <div class="flex items-center justify-between h-12 md:h-14">
 
                 <a href="/" class="flex items-center space-x-3 group">
-                    <img src="{{ asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo"
+                    <img src="{{ !empty($site->logo) ? asset('storage/' . $site->logo) : asset('assets/images/LogoKebunRaya.jpeg') }}" alt="Logo"
                         class="h-10 w-10 rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110"
                         onerror="this.style.display='none'">
 
